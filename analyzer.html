@@ -68,7 +68,7 @@
                     <h2 class="text-xl font-bold mb-4">Score Overview</h2>
                     <canvas id="radarChart"></canvas>
                 </div>
-                
+
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-xl font-bold mb-4">Detailed Metrics</h2>
                     <canvas id="barChart"></canvas>
@@ -196,7 +196,7 @@
 
         function updateRadarChart(website) {
             const ctx = document.getElementById('radarChart');
-            
+
             if (radarChart) {
                 radarChart.destroy();
             }
@@ -284,7 +284,7 @@
                         ${Object.entries(metrics).map(([metric, value]) => `
                             <div class="metric-card p-4 bg-gray-50 rounded-lg">
                                 <div class="text-sm font-medium text-gray-600">
-                                    ${metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                    ${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </div>
                                 <div class="text-lg font-semibold ${getScoreColor(value)}">
                                     ${typeof value === 'number' ? value.toFixed(1) : value}/10
@@ -305,7 +305,7 @@
                 for (const [metric, score] of Object.entries(metrics)) {
                     if (score < 7) {
                         const recommendation = document.createElement('div');
-                        recommendation.className = 'recommendation-card bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm';
+                        recommendation.className = 'recommendation-card p-4 bg-white rounded-lg border-l-4 border-blue-500 shadow-sm';
                         
                         let recommendationText = '';
                         switch(metric) {
@@ -377,62 +377,41 @@
 
             const performanceMetrics = website.metrics.performance;
             
-            const summaryCard = document.createElement('div');
-            summaryCard.className = 'bg-white p-4 rounded-lg shadow-sm';
-            summaryCard.innerHTML = `
-                <h3 class="font-semibold text-lg mb-3">Performance Summary</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <div class="text-sm text-gray-600">Load Time</div>
-                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.load_time)}">
-                            Score: ${performanceMetrics.load_time.toFixed(1)}/10
-                        </div>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <div class="text-sm text-gray-600">Response Size</div>
-                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.response_size)}">
-                            Score: ${performanceMetrics.response_size.toFixed(1)}/10
-                        </div>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <div class="text-sm text-gray-600">Time to First Byte</div>
-                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.ttfb)}">
-                            Score: ${performanceMetrics.ttfb.toFixed(1)}/10
-                        </div>
-                    </div>
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <div class="text-sm text-gray-600">Compression</div>
-                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.compression)}">
-                            Score: ${performanceMetrics.compression.toFixed(1)}/10
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <div class="text-sm text-gray-600">Overall Performance Score</div>
-                    <div class="text-xl font-bold ${getScoreColor(website.scores.performance_score)}">
-                        ${website.scores.performance_score.toFixed(1)}/10
-                    </div>
-                </div>
-            `;
-            container.appendChild(summaryCard);
+            const metricsCard = document.createElement('div');
+            metricsCard.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+            
+            const metrics = [
+                { label: 'Load Time', key: 'load_time' },
+                { label: 'Response Size', key: 'response_size' },
+                { label: 'Time to First Byte', key: 'ttfb' },
+                { label: 'Compression', key: 'compression' }
+            ];
 
-            // Add performance trends or additional metrics if available
-            if (performanceMetrics.historical_data) {
-                const trendsCard = document.createElement('div');
-                trendsCard.className = 'bg-white p-4 rounded-lg shadow-sm mt-4';
-                trendsCard.innerHTML = `
-                    <h3 class="font-semibold text-lg mb-3">Performance Trends</h3>
-                    <div class="space-y-2">
-                        ${Object.entries(performanceMetrics.historical_data).map(([metric, value]) => `
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">${metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                                <span class="font-semibold">${value}</span>
-                            </div>
-                        `).join('')}
+            metrics.forEach(({ label, key }) => {
+                const score = performanceMetrics[key];
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 p-4 rounded-lg';
+                card.innerHTML = `
+                    <div class="text-sm font-medium text-gray-600">${label}</div>
+                    <div class="text-lg font-bold ${getScoreColor(score)}">
+                        Score: ${score.toFixed(1)}/10
                     </div>
                 `;
-                container.appendChild(trendsCard);
-            }
+                metricsCard.appendChild(card);
+            });
+
+          container.appendChild(metricsCard);
+
+            // Add overall performance score
+            const overallScoreCard = document.createElement('div');
+            overallScoreCard.className = 'mt-4 p-4 bg-gray-50 rounded-lg';
+            overallScoreCard.innerHTML = `
+                <div class="text-sm font-medium text-gray-600">Overall Performance Score</div>
+                <div class="text-xl font-bold ${getScoreColor(website.scores.performance_score)}">
+                    ${website.scores.performance_score.toFixed(1)}/10
+                </div>
+            `;
+            container.appendChild(overallScoreCard);
         }
 
         function getScoreColor(score) {
@@ -446,14 +425,6 @@
             if (score >= 6) return 'bg-yellow-100 border-yellow-200';
             return 'bg-red-100 border-red-200';
         }
-
-        // Add event listener for Enter key on textarea
-        document.getElementById('urlInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' && event.ctrlKey) {
-                event.preventDefault();
-                analyzeWebsites();
-            }
-        });
     </script>
 </body>
 </html>
