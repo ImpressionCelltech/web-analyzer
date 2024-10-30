@@ -37,248 +37,243 @@
             padding: 1.5rem;
         }
 
-        .card {
+        .bg-white {
             background: var(--card);
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .shadow {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .p-6 {
             padding: 1.5rem;
+        }
+
+        .mb-6 {
             margin-bottom: 1.5rem;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .text-2xl {
+            font-size: 1.5rem;
         }
 
-        .header h1 {
-            font-size: 2rem;
-            color: var(--text);
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .mb-4 {
             margin-bottom: 1rem;
         }
 
-        .input-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .input-section {
-                flex-direction: row;
-            }
-        }
-
-        input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            min-width: 0;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        button:disabled {
-            background: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        #progressContainer {
-            margin-top: 1.5rem;
+        .hidden {
             display: none;
         }
 
-        .progress-bar {
+        .mt-4 {
+            margin-top: 1rem;}
+
+        .w-full {
             width: 100%;
+        }
+
+        .bg-gray-200 {
+            background-color: #e5e7eb;
+        }
+
+        .rounded-full {
+            border-radius: 9999px;
+        }
+
+        .h-2 {
             height: 0.5rem;
-            background: var(--border);
-            border-radius: 999px;
-            overflow: hidden;
         }
 
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        #results {
-            display: none;
-            margin-top: 2rem;
+        .bg-blue-500 {
+            background-color: #3b82f6;
         }
 
         .grid {
             display: grid;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
         }
 
         @media (min-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
-        @media (min-width: 1024px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .gap-4 {
+            gap: 1rem;
         }
 
-        .metric-card {
-            background: var(--card);
-            padding: 1.5rem;
+        .gap-6 {
+            gap: 1.5rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        /* Form elements */
+        textarea, input, button {
+            font-size: 16px;
+            padding: 0.75rem;
             border-radius: 0.5rem;
             border: 1px solid var(--border);
         }
 
-        .metric-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+        textarea {
+            min-height: 120px;
+            resize: vertical;
         }
 
-        .score {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 1rem 0;
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
         }
 
-        .good { color: var(--success); }
-        .average { color: var(--warning); }
-        .poor { color: var(--danger); }
-
-        .recommendations {
-            margin-top: 2rem;
+        button:hover {
+            background-color: #1d4ed8;
         }
 
-        .recommendation-item {
-            padding: 1rem;
-            border-left: 4px solid var(--primary);
-            background: var(--card);
-            margin-bottom: 1rem;
-            border-radius: 0 0.5rem 0.5rem 0;
+        button:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
         }
 
         .error-message {
-            background: #fee2e2;
             color: var(--danger);
+            background-color: #fee2e2;
             padding: 1rem;
             border-radius: 0.5rem;
             margin: 1rem 0;
             display: none;
         }
 
-        .website-card {
-            background: var(--card);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-        }
-
-        .website-url {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .metrics-grid {
-            display: grid;
-            gap: 1rem;
+        .chart-container {
+            position: relative;
+            height: 300px;
             margin-top: 1rem;
         }
 
-        @media (min-width: 768px) {
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            textarea, input, button {
+                width: 100%;
             }
         }
 
-        .chart-container {
-            margin-top: 2rem;
-            height: 300px;
+        /* Score indicators */
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .score.good { color: var(--success); }
+        .score.average { color: var(--warning); }
+        .score.poor { color: var(--danger); }
+
+        /* Card styles */
+        .metric-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Technical Website Analysis</h1>
-            <p>Analyze your website's technical performance, SEO, accessibility, and design</p>
-        </div>
-
-        <div class="card">
-            <div class="input-section">
-                <input type="text" id="urlInput" placeholder="Enter website URL (e.g., example.com)" />
-                <button id="analyzeButton">Analyze Website</button>
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold mb-4">Technical Website Analysis</h1>
+            
+            <div class="mb-4">
+                <label for="urlsInput" class="block mb-2">Enter URLs (one per line):</label>
+                <textarea 
+                    id="urlsInput" 
+                    class="w-full p-4 border rounded" 
+                    placeholder="example.com&#10;example.org&#10;example.net"></textarea>
             </div>
+
+            <button id="analyzeButton" class="w-full md:w-auto">
+                Analyze Websites
+            </button>
+
             <div id="errorMessage" class="error-message"></div>
-            <div id="progressContainer">
-                <div class="progress-bar">
-                    <div id="progressBar" class="progress-bar-fill"></div>
+
+            <div id="progressContainer" class="hidden mt-4">
+                <div class="w-full bg-gray-200 rounded-full">
+                    <div id="progressBar" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <div id="results">
-            <div class="card">
-                <h2>Overall Score</h2>
-                <div id="overallScore" class="score"></div>
+        <div id="results" class="hidden space-y-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Analyzed Websites</h2>
+                <div id="websiteList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
 
-            <div class="grid">
-                <div class="metric-card">
-                    <h3>Performance</h3>
-                    <div id="performanceScore" class="score"></div>
-                    <div id="performanceDetails"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">Score Overview</h2>
+                    <div id="scoreOverview"></div>
+                    <div id="scoreChart" class="chart-container">
+                        <canvas id="overallScoreChart"></canvas>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <h3>SEO</h3>
-                    <div id="seoScore" class="score"></div>
-                    <div id="seoDetails"></div>
-                </div>
-                <div class="metric-card">
-                    <h3>Accessibility</h3>
-                    <div id="accessibilityScore" class="score"></div>
-                    <div id="accessibilityDetails"></div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">Detailed Metrics</h2>
+                    <div id="detailedMetrics"></div>
                 </div>
             </div>
 
-            <div class="card recommendations">
-                <h2>Technical Recommendations</h2>
-                <div id="recommendationsList"></div>
-            </div>
-
-            <div class="card">
-                <h2>Detailed Analysis</h2>
-                <div class="chart-container">
-                    <canvas id="metricsChart"></canvas>
-                </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Technical Recommendations</h2>
+                <div id="recommendations" class="space-y-4"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const urlInput = document.getElementById('urlInput');
+        const urlsInput = document.getElementById('urlsInput');
         const analyzeButton = document.getElementById('analyzeButton');
         const errorMessage = document.getElementById('errorMessage');
         const progressContainer = document.getElementById('progressContainer');
         const progressBar = document.getElementById('progressBar');
         const results = document.getElementById('results');
+        let overallScoreChart = null;
 
         function showError(message) {
             errorMessage.textContent = message;
@@ -299,56 +294,22 @@
             return 'poor';
         }
 
-        function displayResults(data) {
-            results.style.display = 'block';
+        function createScoreChart(data) {
+            const ctx = document.getElementById('overallScoreChart').getContext('2d');
             
-            // Display scores
-            const scores = data.detailed_results[0].scores;
-            document.getElementById('overallScore').textContent = `${scores.overall_score}/10`;
-            document.getElementById('overallScore').className = `score ${getScoreClass(scores.overall_score)}`;
-            
-            document.getElementById('performanceScore').textContent = `${scores.performance_score}/10`;
-            document.getElementById('performanceScore').className = `score ${getScoreClass(scores.performance_score)}`;
-            
-            document.getElementById('seoScore').textContent = `${scores.seo_score}/10`;
-            document.getElementById('seoScore').className = `score ${getScoreClass(scores.seo_score)}`;
-            
-            document.getElementById('accessibilityScore').textContent = `${scores.accessibility_score}/10`;
-            document.getElementById('accessibilityScore').className = `score ${getScoreClass(scores.accessibility_score)}`;
+            if (overallScoreChart) {
+                overallScoreChart.destroy();
+            }
 
-            // Create recommendations
-            const metrics = data.detailed_results[0].metrics;
-            const recommendationsList = document.getElementById('recommendationsList');
-            recommendationsList.innerHTML = '';
-
-            Object.entries(metrics).forEach(([category, categoryMetrics]) => {
-                Object.entries(categoryMetrics).forEach(([metric, score]) => {
-                    if (score < 7) {
-                        const recommendation = document.createElement('div');
-                        recommendation.className = 'recommendation-item';
-                        recommendation.innerHTML = `
-                            <h4>${category.charAt(0).toUpperCase() + category.slice(1)}: ${metric.replace(/_/g, ' ')}</h4>
-                            <p>Score: ${score}/10</p>
-                        `;
-                        recommendationsList.appendChild(recommendation);
-                    }
-                });
-            });
-
-            // Create chart
-            const ctx = document.getElementById('metricsChart').getContext('2d');
-            new Chart(ctx, {
+            overallScoreChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Performance', 'SEO', 'Accessibility', 'Design'],
+                    labels: Object.keys(data.average_scores).map(key => 
+                        key.replace('_score', '').replace(/_/g, ' ').toUpperCase()
+                    ),
                     datasets: [{
-                        label: 'Scores',
-                        data: [
-                            scores.performance_score,
-                            scores.seo_score,
-                            scores.accessibility_score,
-                            scores.design_score
-                        ],
+                        label: 'Average Scores',
+                        data: Object.values(data.average_scores),
                         backgroundColor: 'rgba(37, 99, 235, 0.2)',
                         borderColor: 'rgba(37, 99, 235, 1)',
                         borderWidth: 2
@@ -358,25 +319,123 @@
                     scales: {
                         r: {
                             beginAtZero: true,
-                            max: 10
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
                         }
                     }
                 }
             });
         }
 
-        analyzeButton.addEventListener('click', async () => {
-            const url = urlInput.value.trim();
+        function displayResults(data) {
+            // Website List
+            const websiteList = document.getElementById('websiteList');
+            websiteList.innerHTML = '';
+
+            data.detailed_results.forEach(result => {
+                if (result.success) {
+                    const websiteCard = document.createElement('div');
+                    websiteCard.className = 'metric-card';
+                    websiteCard.innerHTML = `
+                        <h3 class="font-bold">${result.url}</h3>
+                        <div class="score ${getScoreClass(result.scores.overall_score)}">
+                            ${result.scores.overall_score.toFixed(1)}/10
+                        </div>
+                    `;
+                    websiteList.appendChild(websiteCard);
+                }
+            });
+
+            // Score Overview
+            const scoreOverview = document.getElementById('scoreOverview');
+            scoreOverview.innerHTML = `
+                <div class="space-y-2">
+                    ${Object.entries(data.average_scores).map(([key, value]) => `
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">${key.replace(/_/g, ' ').toUpperCase()}:</span>
+                            <span class="${getScoreClass(value)}">${value.toFixed(1)}/10</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            createScoreChart(data);
+
+            // Detailed Metrics
+            const detailedMetrics = document.getElementById('detailedMetrics');
+            detailedMetrics.innerHTML = '';
             
-            if (!url) {
-                showError('Please enter a website URL');
+            data.detailed_results.forEach(result => {
+                if (result.success) {
+                    const metricsDiv = document.createElement('div');
+                    metricsDiv.className = 'mb-4';
+                    metricsDiv.innerHTML = `
+                        <h3 class="font-bold mb-2">${result.url}</h3>
+                        ${Object.entries(result.metrics).map(([category, metrics]) => `
+                            <div class="mb-2">
+                                <h4 class="font-semibold">${category.toUpperCase()}</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${Object.entries(metrics).map(([metric, score]) => `
+                                        <div class="flex justify-between">
+                                            <span>${metric.replace(/_/g, ' ')}</span>
+                                            <span class="${getScoreClass(score)}">${score}/10</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                    detailedMetrics.appendChild(metricsDiv);
+                }
+            });
+
+            // Recommendations
+            const recommendations = document.getElementById('recommendations');
+            recommendations.innerHTML = '';
+            data.detailed_results.forEach(result => {
+                if (result.success) {
+                    Object.entries(result.metrics).forEach(([category, metrics]) => {
+                        Object.entries(metrics).forEach(([metric, score]) => {
+                            if (score < 7) {
+                                const rec = document.createElement('div');
+                                rec.className = 'metric-card';
+                                rec.innerHTML = `
+                                    <div class="font-semibold">${result.url}</div>
+                                    <div class="mt-2">
+                                        <span class="text-gray-600">${category}:</span>
+                                        ${metric.replace(/_/g, ' ')} 
+                                        <span class="${getScoreClass(score)}">(${score}/10)</span>
+                                    </div>
+                                `;
+                                recommendations.appendChild(rec);
+                            }
+                        });
+                    });
+                }
+            });
+
+            results.classList.remove('hidden');
+        }
+
+        analyzeButton.addEventListener('click', async () => {
+            const urls = urlsInput.value.trim().split('\n').filter(url => url.trim());
+            
+            if (urls.length === 0) {
+                showError('Please enter at least one URL');
                 return;
             }
 
             try {
                 hideError();
                 analyzeButton.disabled = true;
-                progressContainer.style.display = 'block';
+                progressContainer.classList.remove('hidden');
                 updateProgress(20);
 
                 const response = await fetch('/api/analyze', {
@@ -384,9 +443,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        urls: [url]
-                    })
+                    body: JSON.stringify({ urls })
                 });
 
                 updateProgress(70);
@@ -399,13 +456,13 @@
 
                 updateProgress(100);
                 setTimeout(() => {
-                    progressContainer.style.display = 'none';
+                    progressContainer.classList.add('hidden');
                     displayResults(data.data);
                 }, 500);
 
             } catch (error) {
                 showError(error.message);
-                results.style.display = 'none';
+                results.classList.add('hidden');
             } finally {
                 analyzeButton.disabled = false;
             }
