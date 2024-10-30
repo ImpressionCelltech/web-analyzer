@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Analyzer - Technical Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .score-card {
+            transition: all 0.3s ease;
+        }
+        .score-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .metric-card {
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateX(5px);
+        }
+        .recommendation-card {
+            transition: all 0.3s ease;
+        }
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-6">
+        <!-- Input Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold mb-4">Technical Website Analysis</h1>
+            <textarea 
+                id="urlInput" 
+                class="w-full p-2 border rounded mb-4" 
+                rows="4" 
+                placeholder="Enter websites (one per line):&#10;example.com&#10;google.com&#10;github.com"
+            ></textarea>
+            <button 
+                onclick="analyzeWebsites()" 
+                id="analyzeButton"
+                class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 font-semibold"
+            >
+                Analyze Websites
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden space-y-6">
+            <!-- Website Selection -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Analyzed Websites</h2>
+                <div id="websiteList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Technical Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">Score Overview</h2>
+                    <canvas id="radarChart"></canvas>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4">Detailed Metrics</h2>
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Technical Recommendations</h2>
+                <div id="recommendations" class="space-y-4"></div>
+            </div>
+
+            <!-- Detailed Metrics -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Technical Analysis</h2>
+                <div id="detailedMetrics" class="space-y-6"></div>
+            </div>
+
+            <!-- Performance Timeline -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Performance Metrics</h2>
+                <div id="performanceMetrics" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWebsite = null;
+        let radarChart = null;
+        let barChart = null;
+
+        async function analyzeWebsites() {
+            const button = document.getElementById('analyzeButton');
+            const urls = document.getElementById('urlInput').value
+                .split('\n')
+                .map(url => url.trim())
+                .filter(url => url);
+
+            if (urls.length === 0) {
+                alert('Please enter at least one URL');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Analyzing...';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls })
+                });
+
+                const result = await response.json();
+                document.getElementById('results').classList.remove('hidden');
+                displayResults(result.data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing websites. Please check the console for details.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Analyze Websites';
+            }
+        }
+
+        function displayResults(data) {
+            const websiteList = document.getElementById('websiteList');
+            websiteList.innerHTML = '';
+
+            data.detailed_results.forEach(website => {
+                if (!website.success) return;
+
+                const card = document.createElement('div');
+                card.className = `score-card bg-white p-4 rounded-lg border-2 cursor-pointer 
+                    ${getScoreBackground(website.scores.overall_score)}`;
+                card.onclick = () => updateCharts(website);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium truncate">${website.url}</span>
+                        <span class="text-green-500">✓</span>
+                    </div>
+                    <div class="text-xl font-bold mt-2 ${getScoreColor(website.scores.overall_score)}">
+                        ${website.scores.overall_score.toFixed(1)}/10
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">
+                        Click for detailed analysis
+                    </div>
+                `;
+
+                websiteList.appendChild(card);
+            });
+
+            if (data.detailed_results.length > 0) {
+                updateCharts(data.detailed_results[0]);
+            }
+        }
+
+        function updateCharts(website) {
+            currentWebsite = website;
+            updateRadarChart(website);
+            updateBarChart(website);
+            updateMetricsTable(website);
+            updateRecommendations(website);
+            updatePerformanceMetrics(website);
+        }
+
+        function updateRadarChart(website) {
+            const ctx = document.getElementById('radarChart');
+            
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Performance', 'Design', 'SEO', 'Accessibility'],
+                    datasets: [{
+                        label: 'Scores',
+                        data: [
+                            website.scores.performance_score,
+                            website.scores.design_score,
+                            website.scores.seo_score,
+                            website.scores.accessibility_score
+                        ],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBarChart(website) {
+            const ctx = document.getElementById('barChart');
+            const metrics = [];
+            const values = [];
+
+            for (const [category, categoryMetrics] of Object.entries(website.metrics)) {
+                for (const [metric, value] of Object.entries(categoryMetrics)) {
+                    metrics.push(`${category}: ${metric}`);
+                    values.push(value);
+                }
+            }
+
+            if (barChart) {
+                barChart.destroy();
+            }
+
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: metrics,
+                    datasets: [{
+                        label: 'Score',
+                        data: values,
+                        backgroundColor: 'rgb(59, 130, 246)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function getRecommendationStyle(category) {
+            switch(category.toLowerCase()) {
+                case 'performance':
+                    return {
+                        bg: 'bg-red-50',
+                        border: 'border-red-200',
+                        text: 'text-red-700',
+                        item: 'text-red-600'
+                    };
+                case 'seo':
+                    return {
+                        bg: 'bg-yellow-50',
+                        border: 'border-yellow-200',
+                        text: 'text-yellow-700',
+                        item: 'text-yellow-600'
+                    };
+                case 'accessibility':
+                    return {
+                        bg: 'bg-orange-50',
+                        border: 'border-orange-200',
+                        text: 'text-orange-700',
+                        item: 'text-orange-600'
+                    };
+                case 'design':
+                    return {
+                        bg: 'bg-blue-50',
+                        border: 'border-blue-200',
+                        text: 'text-blue-700',
+                        item: 'text-blue-600'
+                    };
+                default:
+                    return {
+                        bg: 'bg-gray-50',
+                        border: 'border-gray-200',
+                        text: 'text-gray-700',
+                        item: 'text-gray-600'
+                    };
+            }
+        }
+
+        function updateRecommendations(website) {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = '';
+
+            const recommendations = [];
+
+            if (website.scores.performance_score < 7) {
+                recommendations.push({
+                    category: 'Performance',
+                    items: [
+                        {
+                            title: 'Speed Optimization',
+                            items: [
+                                'Implement browser caching for static resources',
+                                'Enable GZIP compression',
+                                'Minify CSS, JavaScript, and HTML',
+                                'Optimize images and media content'
+                            ]
+                        },
+                        {
+                            title: 'Server Response',
+                            items: [
+                                'Reduce server response time',
+                                'Optimize database queries',
+                                'Implement CDN for static content'
+                            ]
+                        }
+                    ]
+                });
+            }
+
+            if (website.scores.seo_score < 7) {
+                recommendations.push({
+                    category: 'SEO',
+                    items: [
+                        {
+                            title: 'Content Optimization',
+                            items: [
+                                'Improve meta titles and descriptions',
+                                'Implement proper heading structure',
+                                'Add alt text to all images',
+                                'Optimize URL structure'
+                            ]
+                        },
+                        {
+                            title: 'Technical SEO',
+                            items: [
+                                'Create XML sitemap',
+                                'Implement canonical URLs',
+                                'Fix broken links and redirects',
+                                'Improve mobile-friendliness'
+                            ]
+                        }
+                    ]
+                });
+            }
+
+            if (website.scores.accessibility_score < 7) {
+                recommendations.push({
+                    category: 'Accessibility',
+                    items: [
+                        {
+                            title: 'Content Accessibility',
+                            items: [
+                                'Add proper ARIA labels',
+                                'Improve keyboard navigation',
+                                'Ensure sufficient color contrast',
+                                'Provide text alternatives for media'
+                            ]
+                        },
+                        {
+                            title: 'Structure',
+                            items: [
+                                'Implement proper heading hierarchy',
+                                'Add proper form labels and descriptions',
+                                'Ensure logical tab order',
+                                'Add skip navigation links'
+                            ]
+                        }
+                    ]
+                });
+            }
+
+            if (website.scores.design_score < 7) {
+                recommendations.push({
+                    category: 'Design',
+                    items: [
+                        {
+                            title: 'Visual Design',
+                            items: [
+                                'Improve responsive design implementation',
+                                'Enhance visual hierarchy',
+                                'Optimize typography and readability',
+                                'Implement consistent spacing'
+                            ]
+                        },
+                        {
+                            title: 'User Experience',
+                            items: [
+                                'Improve navigation structure',
+                                'Enhance mobile user experience',
+                                'Optimize form design',
+                                'Improve content layout'
+                            ]
+                        }
+                    ]
+                });
+            }
+
+            recommendations.forEach(rec => {
+                const style = getRecommendationStyle(rec.category);
+                const card = document.createElement('div');
+                card.className = `recommendation-card ${style.bg} border ${style.border} rounded-lg p-6 mb-4`;
+                
+                let html = `<h3 class="text-xl font-bold ${style.text} mb-4">${rec.category} Recommendations</h3>`;
+                
+                rec.items.forEach(section => {
+                    html += `
+                        <div class="mb-4">
+                            <h4 class="font-semibold ${style.text} mb-2">${section.title}</h4>
+                            <ul class="space-y-2">
+                                ${section.items.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="${style.item}">•</span>
+                                        <span class="${style.item} ml-2">${item}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-green-700 mb-2">Excellent Performance!</h3>
+                        <p class="text-green-600">
+                            Your website meets or exceeds all technical requirements across all categories.
+                            Keep maintaining these high standards!
+                        </p>
+                        <div class="mt-4 p-4 bg-green-100 rounded-lg">
+                            <h4 class="font-semibold text-green-700 mb-2">Maintenance Tips:</h4>
+                            <ul class="space-y-2 text-green-600">
+                                <li>• Regularly monitor performance metrics</li>
+                                <li>• Keep software and plugins updated</li>
+                                <li>• Perform regular security audits</li>
+                                <li>• Stay informed about web standards</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateMetricsTable(website) {
+            const container = document.getElementById('detailedMetrics');
+            container.innerHTML = '';
+
+            for (const [category, metrics] of Object.entries(website.metrics)) {
+                const section = document.createElement('div');
+                section.className = 'space-y-4';
+                section.innerHTML = `
+                    <h3 class="text-lg font-semibold capitalize">${category} Metrics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${Object.entries(metrics).map(([metric, value]) => `
+                            <div class="metric-card p-4 bg-gray-50 rounded-lg">
+                                <div class="text-sm font-medium text-gray-600">
+                                    ${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </div>
+                                <div class="text-lg font-semibold ${getScoreColor(value)}">
+                                    ${typeof value === 'number' ? value.toFixed(1) : value}/10
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
+            }
+        }
+
+        function updatePerformanceMetrics(website) {
+            const container = document.getElementById('performanceMetrics');
+            const metrics = website.metrics.performance;
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${Object.entries(metrics).map(([metric, value]) => `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-semibold mb-2">${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
+                            <div class="space-y-2">
+                                <div class="h-2 bg-gray-200 rounded-full">
+                                    <div class="h-2 bg-blue-500 rounded-full" 
+                                         style="width: ${value * 10}%"></div>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    Score: ${value.toFixed(1)}/10
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getScoreColor(score) {
+            if (score >= 8) return 'text-green-600';
+            if (score >= 6) return 'text-yellow-600';
+            return 'text-red-600';
+        }
+
+        function getScoreBackground(score) {
+            if (score >= 8) return 'bg-green-100 border-green-200';
+            if (score >= 6) return 'bg-yellow-100 border-yellow-200';
+            return 'bg-red-100 border-red-200';
+        }
+    </script>
+</body>
+</html>

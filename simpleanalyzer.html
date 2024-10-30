@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Health Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .health-card {
+            transition: all 0.3s ease;
+        }
+        .health-card:hover {
+            transform: translateY(-5px);
+        }
+        .emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .recommendation-card {
+            transition: all 0.3s ease;
+        }
+        .recommendation-card:hover {
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Website Health Check</h1>
+            <p class="text-gray-600 mt-2">Simple tool to check how well your website is doing</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <label class="block text-lg font-medium mb-2">Enter your website address:</label>
+            <div class="space-y-4">
+                <textarea 
+                    id="urlInput" 
+                    class="w-full p-3 border rounded-lg text-lg"
+                    rows="3"
+                    placeholder="Example: mywebsite.com"
+                ></textarea>
+                <button 
+                    onclick="checkWebsite()" 
+                    id="checkButton"
+                    class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 font-bold text-lg transition-colors"
+                >
+                    Check My Website
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section (initially hidden) -->
+        <div id="resultsSection" class="hidden space-y-8">
+            <!-- Overall Score -->
+            <div id="overallScore" class="text-center bg-white rounded-xl shadow-lg p-8">
+                <!-- Will be filled by JavaScript -->
+            </div>
+
+            <!-- Health Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="healthCards">
+                <!-- Will be filled by JavaScript -->
+            </div>
+
+            <!-- Action Items -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">Things You Can Improve</h2>
+                <div id="actionItems" class="space-y-4">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Simple Explanation -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6">What This Means</h2>
+                <div id="explanation" class="prose max-w-none">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkWebsite() {
+            const button = document.getElementById('checkButton');
+            const urls = document.getElementById('urlInput').value
+                .split('\n')
+                .map(url => url.trim())
+                .filter(url => url);
+
+            if (urls.length === 0) {
+                alert('Please enter a website address');
+                return;
+            }
+
+            // Update button state
+            button.disabled = true;
+            button.textContent = 'Checking...';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls })
+                });
+
+                const result = await response.json();
+                if (result.data.detailed_results.length > 0) {
+                    showResults(result.data.detailed_results[0]);
+                    document.getElementById('resultsSection').classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('Sorry, there was a problem checking your website. Please try again.');
+                console.error('Error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Check My Website';
+            }
+        }
+
+        function getEmoji(score) {
+            if (score >= 8) return '🌟';
+            if (score >= 6) return '👍';
+            if (score >= 4) return '⚠️';
+            return '⚡';
+        }
+
+        function getStatus(score) {
+            if (score >= 8) return 'Excellent';
+            if (score >= 6) return 'Good';
+            if (score >= 4) return 'Needs Work';
+            return 'Needs Urgent Attention';
+        }
+
+        function getColor(score) {
+            if (score >= 8) return 'green';
+            if (score >= 6) return 'blue';
+            if (score >= 4) return 'yellow';
+            return 'red';
+        }
+
+        function getScopeCardBg(score) {
+            if (score >= 8) return 'bg-green-50 border-green-200';
+            if (score >= 6) return 'bg-blue-50 border-blue-200';
+            if (score >= 4) return 'bg-yellow-50 border-yellow-200';
+            return 'bg-red-50 border-red-200';
+        }
+
+        function getActionColor(score) {
+            if (score >= 8) return 'bg-green-100 border-green-300 text-green-800';
+            if (score >= 6) return 'bg-blue-100 border-blue-300 text-blue-800';
+            if (score >= 4) return 'bg-yellow-100 border-yellow-300 text-yellow-800';
+            return 'bg-red-100 border-red-300 text-red-800';
+        }
+
+        function getSimpleExplanation(score) {
+            if (score >= 8) return 'Your website is performing very well in this area. Keep up the good work!';
+            if (score >= 6) return 'Your website is doing good, but there\'s room for some improvements.';
+            if (score >= 4) return 'This area needs attention to meet current web standards.';
+            return 'This area needs immediate improvement to better serve your visitors.';
+        }
+
+        function showResults(data) {
+            // Overall Score
+            const overallScore = document.getElementById('overallScore');
+            overallScore.innerHTML = `
+                <div class="text-6xl mb-4">${getEmoji(data.scores.overall_score)}</div>
+                <h2 class="text-3xl font-bold mb-2">Overall Health Score</h2>
+                <div class="text-4xl font-bold ${data.scores.overall_score >= 6 ? 'text-green-600' : 'text-yellow-600'}">
+                    ${Math.round(data.scores.overall_score * 10)}%
+                </div>
+                <p class="text-gray-600 mt-2">Based on our analysis of ${data.url}</p>
+            `;
+
+            // Health Cards
+            const healthCards = document.getElementById('healthCards');
+            healthCards.innerHTML = `
+                <div class="health-card ${getScopeCardBg(data.scores.performance_score)} border rounded-xl p-6 text-center">
+                    <div class="emoji">${getEmoji(data.scores.performance_score)}</div>
+                    <h3 class="text-xl font-bold mb-2">Website Speed</h3>
+                    <p class="text-lg">${getStatus(data.scores.performance_score)}</p>
+                </div>
+                <div class="health-card ${getScopeCardBg(data.scores.seo_score)} border rounded-xl p-6 text-center">
+                    <div class="emoji">${getEmoji(data.scores.seo_score)}</div>
+                    <h3 class="text-xl font-bold mb-2">Search Engine Visibility</h3>
+                    <p class="text-lg">${getStatus(data.scores.seo_score)}</p>
+                </div>
+                <div class="health-card ${getScopeCardBg(data.scores.accessibility_score)} border rounded-xl p-6 text-center">
+                    <div class="emoji">${getEmoji(data.scores.accessibility_score)}</div>
+                    <h3 class="text-xl font-bold mb-2">User Experience</h3>
+                    <p class="text-lg">${getStatus(data.scores.accessibility_score)}</p>
+                </div>
+            `;
+
+            // Action Items
+            const actionItems = document.getElementById('actionItems');
+            let actionHtml = '';
+
+            // Performance Actions
+            if (data.scores.performance_score < 7) {
+                actionHtml += `
+                    <div class="recommendation-card ${getActionColor(data.scores.performance_score)} border rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-3">Speed Improvements Needed</h3>
+                        <ul class="space-y-2">
+                            <li>• Make your website faster by optimizing images</li>
+                            <li>• Enable caching to speed up repeat visits</li>
+                            <li>• Remove unnecessary code and files</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // SEO Actions
+            if (data.scores.seo_score < 7) {
+                actionHtml += `
+                    <div class="recommendation-card ${getActionColor(data.scores.seo_score)} border rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-3">Search Visibility Improvements</h3>
+                        <ul class="space-y-2">
+                            <li>• Add better page titles and descriptions</li>
+                            <li>• Organize your content with proper headings</li>
+                            <li>• Make sure search engines can find all your pages</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // Accessibility Actions
+            if (data.scores.accessibility_score < 7) {
+                actionHtml += `
+                    <div class="recommendation-card ${getActionColor(data.scores.accessibility_score)} border rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-3">User Experience Improvements</h3>
+                        <ul class="space-y-2">
+                            <li>• Make your website easier to navigate</li>
+                            <li>• Ensure text is easy to read</li>
+                            <li>• Improve how your website works on mobile devices</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            actionItems.innerHTML = actionHtml || '<p class="text-green-600 text-lg">👏 Great job! Your website is performing well in all areas!</p>';
+
+            // Explanation
+            const explanation = document.getElementById('explanation');
+            explanation.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-lg">Here's what we found when checking your website (${data.url}):</p>
+                    
+                    <div class="space-y-2">
+                        <p><strong>Website Speed:</strong> ${getSimpleExplanation(data.scores.performance_score)}</p>
+                        <div class="h-2 bg-gray-200 rounded-full">
+                            <div class="h-2 bg-blue-500 rounded-full" style="width: ${data.scores.performance_score * 10}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p><strong>Search Engine Visibility:</strong> ${getSimpleExplanation(data.scores.seo_score)}</p>
+                        <div class="h-2 bg-gray-200 rounded-full">
+                            <div class="h-2 bg-blue-500 rounded-full" style="width: ${data.scores.seo_score * 10}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p><strong>User Experience:</strong> ${getSimpleExplanation(data.scores.accessibility_score)}</p>
+                        <div class="h-2 bg-gray-200 rounded-full">
+                            <div class="h-2 bg-blue-500 rounded-full" style="width: ${data.scores.accessibility_score * 10}%"></div>
+                        </div>
+                    </div>
+
+                    <p class="mt-6 text-lg">
+                        ${data.scores.overall_score >= 8 
+                            ? "🎉 Your website is doing great! Keep maintaining these high standards." 
+                            : "Following our recommendations above will help improve your website's performance and user experience."}
+                    </p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
