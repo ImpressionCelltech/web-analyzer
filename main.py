@@ -37,11 +37,8 @@ class AnalysisResponse(BaseModel):
 
 @app.get("/")
 async def root():
+    # Updated to look for analyzer.html directly in the root directory
     return FileResponse("analyzer.html")
-
-@app.get("/simple")
-async def simple():
-    return FileResponse("simpleanalyzer.html")
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_websites(website_list: WebsiteList):

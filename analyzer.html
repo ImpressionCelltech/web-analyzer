@@ -2,327 +2,264 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technical Website Analysis</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Analyzer - Technical Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --background: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --border: #e2e8f0;
+        .score-card {
+            transition: all 0.3s ease;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        .score-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.5;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .bg-white {
-            background: var(--card);
-        }
-
-        .rounded-lg {
-            border-radius: 0.5rem;
-        }
-
-        .shadow {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .p-6 {
-            padding: 1.5rem;
-        }
-
-        .mb-6 {
-            margin-bottom: 1.5rem;
-        }
-
-        .text-2xl {
-            font-size: 1.5rem;
-        }
-
-        .font-bold {
-            font-weight: bold;
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .mt-4 {
-            margin-top: 1rem;}
-
-        .w-full {
-            width: 100%;
-        }
-
-        .bg-gray-200 {
-            background-color: #e5e7eb;
-        }
-
-        .rounded-full {
-            border-radius: 9999px;
-        }
-
-        .h-2 {
-            height: 0.5rem;
-        }
-
-        .bg-blue-500 {
-            background-color: #3b82f6;
-        }
-
-        .grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .grid-cols-1 {
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-        }
-
-        @media (min-width: 768px) {
-            .md\:grid-cols-2 {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            
-            .md\:grid-cols-3 {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
-
-        .gap-4 {
-            gap: 1rem;
-        }
-
-        .gap-6 {
-            gap: 1.5rem;
-        }
-
-        .space-y-4 > * + * {
-            margin-top: 1rem;
-        }
-
-        .space-y-6 > * + * {
-            margin-top: 1.5rem;
-        }
-
-        /* Form elements */
-        textarea, input, button {
-            font-size: 16px;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #1d4ed8;
-        }
-
-        button:disabled {
-            background-color: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            color: var(--danger);
-            background-color: #fee2e2;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            display: none;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 1rem;
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            textarea, input, button {
-                width: 100%;
-            }
-        }
-
-        /* Score indicators */
-        .score {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0.5rem 0;
-        }
-
-        .score.good { color: var(--success); }
-        .score.average { color: var(--warning); }
-        .score.poor { color: var(--danger); }
-
-        /* Card styles */
         .metric-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateX(5px);
+        }
+        .recommendation-card {
+            transition: all 0.3s ease;
+        }
+        .recommendation-card:hover {
+            transform: translateY(-3px);
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-gray-50">
+    <div class="container mx-auto p-6">
+        <!-- Input Section -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
             <h1 class="text-2xl font-bold mb-4">Technical Website Analysis</h1>
-            
-            <div class="mb-4">
-                <label for="urlsInput" class="block mb-2">Enter URLs (one per line):</label>
-                <textarea 
-                    id="urlsInput" 
-                    class="w-full p-4 border rounded" 
-                    placeholder="example.com&#10;example.org&#10;example.net"></textarea>
-            </div>
-
-            <button id="analyzeButton" class="w-full md:w-auto">
+            <textarea 
+                id="urlInput" 
+                class="w-full p-2 border rounded mb-4" 
+                rows="4" 
+                placeholder="Enter websites (one per line):&#10;example.com&#10;google.com&#10;github.com"
+            ></textarea>
+            <button 
+                onclick="analyzeWebsites()" 
+                id="analyzeButton"
+                class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 font-semibold"
+            >
                 Analyze Websites
             </button>
-
-            <div id="errorMessage" class="error-message"></div>
-
+            <!-- Progress Bar -->
             <div id="progressContainer" class="hidden mt-4">
                 <div class="w-full bg-gray-200 rounded-full">
-                    <div id="progressBar" class="h-2 bg-blue-500 rounded-full" style="width: 0%"></div>
+                    <div id="progressBar" class="h-2 bg-blue-500 rounded-full" style="width: 0%;"></div>
                 </div>
             </div>
         </div>
 
+        <!-- Results Section -->
         <div id="results" class="hidden space-y-6">
+            <!-- Website Selection -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-xl font-bold mb-4">Analyzed Websites</h2>
                 <div id="websiteList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
 
+            <!-- Technical Overview -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-xl font-bold mb-4">Score Overview</h2>
-                    <div id="scoreOverview"></div>
-                    <div id="scoreChart" class="chart-container">
-                        <canvas id="overallScoreChart"></canvas>
-                    </div>
+                    <canvas id="radarChart"></canvas>
                 </div>
-
+                
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-xl font-bold mb-4">Detailed Metrics</h2>
-                    <div id="detailedMetrics"></div>
+                    <canvas id="barChart"></canvas>
                 </div>
             </div>
 
+            <!-- Recommendations -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-xl font-bold mb-4">Technical Recommendations</h2>
                 <div id="recommendations" class="space-y-4"></div>
+            </div>
+
+            <!-- Detailed Metrics -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Technical Analysis</h2>
+                <div id="detailedMetrics" class="space-y-6"></div>
+            </div>
+
+            <!-- Performance Timeline -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold mb-4">Performance Metrics</h2>
+                <div id="performanceMetrics" class="space-y-4"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const urlsInput = document.getElementById('urlsInput');
-        const analyzeButton = document.getElementById('analyzeButton');
-        const errorMessage = document.getElementById('errorMessage');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const results = document.getElementById('results');
-        let overallScoreChart = null;
+        let currentWebsite = null;
+        let radarChart = null;
+        let barChart = null;
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
+        async function analyzeWebsites() {
+            const button = document.getElementById('analyzeButton');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const urls = document.getElementById('urlInput').value
+                .split('\n')
+                .map(url => url.trim())
+                .filter(url => url);
 
-        function hideError() {
-            errorMessage.style.display = 'none';
-        }
-
-        function updateProgress(percent) {
-            progressBar.style.width = `${percent}%`;
-        }
-
-        function getScoreClass(score) {
-            if (score >= 8) return 'good';
-            if (score >= 6) return 'average';
-            return 'poor';
-        }
-
-        function createScoreChart(data) {
-            const ctx = document.getElementById('overallScoreChart').getContext('2d');
-            
-            if (overallScoreChart) {
-                overallScoreChart.destroy();
+            if (urls.length === 0) {
+                alert('Please enter at least one URL');
+                return;
             }
 
-            overallScoreChart = new Chart(ctx, {
+            button.disabled = true;
+            button.textContent = 'Analyzing...';
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+
+            // Simulate incremental progress to 90%
+            let progress = 0;
+            const incrementProgress = () => {
+                if (progress < 90) {
+                    progress += Math.floor(Math.random() * 10) + 1; // Increase by 1-10%
+                    progressBar.style.width = `${Math.min(progress, 90)}%`;
+                }
+            };
+            const progressInterval = setInterval(incrementProgress, 300);
+
+            try {
+                const response = await fetch('http://localhost:8000/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls })
+                });
+
+                const result = await response.json();
+
+                clearInterval(progressInterval); // Stop progress simulation
+                progressBar.style.width = '100%'; // Set to 100% upon completion
+                document.getElementById('results').classList.remove('hidden');
+                displayResults(result.data);
+            } catch (error) {
+                clearInterval(progressInterval);
+                console.error('Error:', error);
+                alert('Error analyzing websites. Please check the console for details.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Analyze Websites';
+                setTimeout(() => progressContainer.classList.add('hidden'), 1000);
+            }
+        }
+
+        function displayResults(data) {
+            const websiteList = document.getElementById('websiteList');
+            websiteList.innerHTML = '';
+
+            data.detailed_results.forEach(website => {
+                if (!website.success) return;
+
+                const card = document.createElement('div');
+                card.className = `score-card bg-white p-4 rounded-lg border-2 cursor-pointer 
+                    ${getScoreBackground(website.scores.overall_score)}`;
+                card.onclick = () => updateCharts(website);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium truncate">${website.url}</span>
+                        <span class="text-green-500">✓</span>
+                    </div>
+                    <div class="text-xl font-bold mt-2 ${getScoreColor(website.scores.overall_score)}">
+                        ${website.scores.overall_score.toFixed(1)}/10
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">
+                        Click for detailed analysis
+                    </div>
+                `;
+
+                websiteList.appendChild(card);
+            });
+
+            if (data.detailed_results.length > 0) {
+                updateCharts(data.detailed_results[0]);
+            }
+        }
+
+        function updateCharts(website) {
+            currentWebsite = website;
+            updateRadarChart(website);
+            updateBarChart(website);
+            updateMetricsTable(website);
+            updateRecommendations(website);
+        }
+
+        function updateRadarChart(website) {
+            const ctx = document.getElementById('radarChart');
+            
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            radarChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: Object.keys(data.average_scores).map(key => 
-                        key.replace('_score', '').replace(/_/g, ' ').toUpperCase()
-                    ),
+                    labels: ['Performance', 'Design', 'SEO', 'Accessibility'],
                     datasets: [{
-                        label: 'Average Scores',
-                        data: Object.values(data.average_scores),
-                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                        borderColor: 'rgba(37, 99, 235, 1)',
-                        borderWidth: 2
+                        label: 'Scores',
+                        data: [
+                            website.scores.performance_score,
+                            website.scores.design_score,
+                            website.scores.seo_score,
+                            website.scores.accessibility_score
+                        ],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
                     }]
                 },
                 options: {
                     scales: {
                         r: {
                             beginAtZero: true,
-                            max: 10,
-                            ticks: {
-                                stepSize: 2
-                            }
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBarChart(website) {
+            const ctx = document.getElementById('barChart');
+            const metrics = [];
+            const values = [];
+
+            for (const [category, categoryMetrics] of Object.entries(website.metrics)) {
+                for (const [metric, value] of Object.entries(categoryMetrics)) {
+                    metrics.push(`${category}: ${metric}`);
+                    values.push(value);
+                }
+            }
+
+            if (barChart) {
+                barChart.destroy();
+            }
+
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: metrics,
+                    datasets: [{
+                        label: 'Score',
+                        data: values,
+                        backgroundColor: 'rgb(59, 130, 246)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
                         }
                     },
                     plugins: {
@@ -334,139 +271,49 @@
             });
         }
 
-        function displayResults(data) {
-            // Website List
-            const websiteList = document.getElementById('websiteList');
-            websiteList.innerHTML = '';
+        function updateMetricsTable(website) {
+            const container = document.getElementById('detailedMetrics');
+            container.innerHTML = '';
 
-            data.detailed_results.forEach(result => {
-                if (result.success) {
-                    const websiteCard = document.createElement('div');
-                    websiteCard.className = 'metric-card';
-                    websiteCard.innerHTML = `
-                        <h3 class="font-bold">${result.url}</h3>
-                        <div class="score ${getScoreClass(result.scores.overall_score)}">
-                            ${result.scores.overall_score.toFixed(1)}/10
-                        </div>
-                    `;
-                    websiteList.appendChild(websiteCard);
-                }
-            });
-
-            // Score Overview
-            const scoreOverview = document.getElementById('scoreOverview');
-            scoreOverview.innerHTML = `
-                <div class="space-y-2">
-                    ${Object.entries(data.average_scores).map(([key, value]) => `
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold">${key.replace(/_/g, ' ').toUpperCase()}:</span>
-                            <span class="${getScoreClass(value)}">${value.toFixed(1)}/10</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            createScoreChart(data);
-
-            // Detailed Metrics
-            const detailedMetrics = document.getElementById('detailedMetrics');
-            detailedMetrics.innerHTML = '';
-            
-            data.detailed_results.forEach(result => {
-                if (result.success) {
-                    const metricsDiv = document.createElement('div');
-                    metricsDiv.className = 'mb-4';
-                    metricsDiv.innerHTML = `
-                        <h3 class="font-bold mb-2">${result.url}</h3>
-                        ${Object.entries(result.metrics).map(([category, metrics]) => `
-                            <div class="mb-2">
-                                <h4 class="font-semibold">${category.toUpperCase()}</h4>
-                                <div class="grid grid-cols-2 gap-2">
-                                    ${Object.entries(metrics).map(([metric, score]) => `
-                                        <div class="flex justify-between">
-                                            <span>${metric.replace(/_/g, ' ')}</span>
-                                            <span class="${getScoreClass(score)}">${score}/10</span>
-                                        </div>
-                                    `).join('')}
+            for (const [category, metrics] of Object.entries(website.metrics)) {
+                const section = document.createElement('div');
+                section.className = 'space-y-4';
+                section.innerHTML = `
+                    <h3 class="text-lg font-semibold capitalize">${category} Metrics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${Object.entries(metrics).map(([metric, value]) => `
+                            <div class="metric-card p-4 bg-gray-50 rounded-lg">
+                                <div class="text-sm font-medium text-gray-600">
+                                    ${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </div>
+                                <div class="text-lg font-semibold ${getScoreColor(value)}">
+                                    ${typeof value === 'number' ? value.toFixed(1) : value}/10
                                 </div>
                             </div>
                         `).join('')}
-                    `;
-                    detailedMetrics.appendChild(metricsDiv);
-                }
-            });
-
-            // Recommendations
-            const recommendations = document.getElementById('recommendations');
-            recommendations.innerHTML = '';
-            data.detailed_results.forEach(result => {
-                if (result.success) {
-                    Object.entries(result.metrics).forEach(([category, metrics]) => {
-                        Object.entries(metrics).forEach(([metric, score]) => {
-                            if (score < 7) {
-                                const rec = document.createElement('div');
-                                rec.className = 'metric-card';
-                                rec.innerHTML = `
-                                    <div class="font-semibold">${result.url}</div>
-                                    <div class="mt-2">
-                                        <span class="text-gray-600">${category}:</span>
-                                        ${metric.replace(/_/g, ' ')} 
-                                        <span class="${getScoreClass(score)}">(${score}/10)</span>
-                                    </div>
-                                `;
-                                recommendations.appendChild(rec);
-                            }
-                        });
-                    });
-                }
-            });
-
-            results.classList.remove('hidden');
+                    </div>
+                `;
+                container.appendChild(section);
+            }
         }
 
-        analyzeButton.addEventListener('click', async () => {
-            const urls = urlsInput.value.trim().split('\n').filter(url => url.trim());
-            
-            if (urls.length === 0) {
-                showError('Please enter at least one URL');
-                return;
-            }
+        function updateRecommendations(website) {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = '';
+            // Code for generating recommendations based on scores
+        }
 
-            try {
-                hideError();
-                analyzeButton.disabled = true;
-                progressContainer.classList.remove('hidden');
-                updateProgress(20);
+        function getScoreColor(score) {
+            if (score >= 8) return 'text-green-600';
+            if (score >= 6) return 'text-yellow-600';
+            return 'text-red-600';
+        }
 
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ urls })
-                });
-
-                updateProgress(70);
-
-                const data = await response.json();
-                
-                if (!data.success) {
-                    throw new Error(data.error || 'Analysis failed');
-                }
-
-                updateProgress(100);
-                setTimeout(() => {
-                    progressContainer.classList.add('hidden');
-                    displayResults(data.data);
-                }, 500);
-
-            } catch (error) {
-                showError(error.message);
-                results.classList.add('hidden');
-            } finally {
-                analyzeButton.disabled = false;
-            }
-        });
+        function getScoreBackground(score) {
+            if (score >= 8) return 'bg-green-100 border-green-200';
+            if (score >= 6) return 'bg-yellow-100 border-yellow-200';
+            return 'bg-red-100 border-red-200';
+        }
     </script>
 </body>
 </html>
