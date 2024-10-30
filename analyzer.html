@@ -119,11 +119,10 @@
             progressContainer.classList.remove('hidden');
             progressBar.style.width = '0%';
 
-            // Simulate incremental progress to 90%
             let progress = 0;
             const incrementProgress = () => {
                 if (progress < 90) {
-                    progress += Math.floor(Math.random() * 10) + 1; // Increase by 1-10%
+                    progress += Math.floor(Math.random() * 10) + 1;
                     progressBar.style.width = `${Math.min(progress, 90)}%`;
                 }
             };
@@ -138,8 +137,8 @@
 
                 const result = await response.json();
 
-                clearInterval(progressInterval); // Stop progress simulation
-                progressBar.style.width = '100%'; // Set to 100% upon completion
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
                 document.getElementById('results').classList.remove('hidden');
                 displayResults(result.data);
             } catch (error) {
@@ -192,6 +191,7 @@
             updateBarChart(website);
             updateMetricsTable(website);
             updateRecommendations(website);
+            updatePerformanceMetrics(website);
         }
 
         function updateRadarChart(website) {
@@ -284,7 +284,7 @@
                         ${Object.entries(metrics).map(([metric, value]) => `
                             <div class="metric-card p-4 bg-gray-50 rounded-lg">
                                 <div class="text-sm font-medium text-gray-600">
-                                    ${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                    ${metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                 </div>
                                 <div class="text-lg font-semibold ${getScoreColor(value)}">
                                     ${typeof value === 'number' ? value.toFixed(1) : value}/10
@@ -300,7 +300,139 @@
         function updateRecommendations(website) {
             const container = document.getElementById('recommendations');
             container.innerHTML = '';
-            // Code for generating recommendations based on scores
+
+            for (const [category, metrics] of Object.entries(website.metrics)) {
+                for (const [metric, score] of Object.entries(metrics)) {
+                    if (score < 7) {
+                        const recommendation = document.createElement('div');
+                        recommendation.className = 'recommendation-card bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm';
+                        
+                        let recommendationText = '';
+                        switch(metric) {
+                            case 'load_time':
+                                recommendationText = 'Consider optimizing page load time through compression and caching';
+                                break;
+                            case 'response_size':
+                                recommendationText = 'Reduce page size by optimizing images and minifying resources';
+                                break;
+                            case 'color_contrast':
+                                recommendationText = 'Improve color contrast for better accessibility';
+                                break;
+                            case 'typography':
+                                recommendationText = 'Review typography hierarchy and font usage';
+                                break;
+                            case 'responsive_design':
+                                recommendationText = 'Enhance mobile responsiveness and viewport settings';
+                                break;
+                            case 'meta_description':
+                                recommendationText = 'Add meta description for better SEO';
+                                break;
+                            case 'headings':
+                                recommendationText = 'Improve heading structure for better SEO and accessibility';
+                                break;
+                            case 'img_alt':
+                                recommendationText = 'Add alt text to images for accessibility';
+                                break;
+                            case 'form_labels':
+                                recommendationText = 'Ensure all form fields have proper labels';
+                                break;
+                            case 'ttfb':
+                                recommendationText = 'Optimize server response time and consider using a CDN';
+                                break;
+                            case 'compression':
+                                recommendationText = 'Enable GZIP compression for faster page loading';
+                                break;
+                            default:
+                                recommendationText = `Consider improving ${metric.replace(/_/g, ' ')}`;
+                        }
+
+                        recommendation.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold text-lg capitalize">${category}: ${metric.replace(/_/g, ' ')}</h3>
+                                    <p class="text-gray-600 mt-1">${recommendationText}</p>
+                                </div>
+                                <div class="text-lg font-bold ${getScoreColor(score)}">
+                                    ${score.toFixed(1)}/10
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(recommendation);
+                    }
+                }
+            }
+
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-green-600">Great job! No immediate recommendations needed.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updatePerformanceMetrics(website) {
+            const container = document.getElementById('performanceMetrics');
+            container.innerHTML = '';
+
+            const performanceMetrics = website.metrics.performance;
+            
+            const summaryCard = document.createElement('div');
+            summaryCard.className = 'bg-white p-4 rounded-lg shadow-sm';
+            summaryCard.innerHTML = `
+                <h3 class="font-semibold text-lg mb-3">Performance Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <div class="text-sm text-gray-600">Load Time</div>
+                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.load_time)}">
+                            Score: ${performanceMetrics.load_time.toFixed(1)}/10
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <div class="text-sm text-gray-600">Response Size</div>
+                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.response_size)}">
+                            Score: ${performanceMetrics.response_size.toFixed(1)}/10
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <div class="text-sm text-gray-600">Time to First Byte</div>
+                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.ttfb)}">
+                            Score: ${performanceMetrics.ttfb.toFixed(1)}/10
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <div class="text-sm text-gray-600">Compression</div>
+                        <div class="text-lg font-bold ${getScoreColor(performanceMetrics.compression)}">
+                            Score: ${performanceMetrics.compression.toFixed(1)}/10
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="text-sm text-gray-600">Overall Performance Score</div>
+                    <div class="text-xl font-bold ${getScoreColor(website.scores.performance_score)}">
+                        ${website.scores.performance_score.toFixed(1)}/10
+                    </div>
+                </div>
+            `;
+            container.appendChild(summaryCard);
+
+            // Add performance trends or additional metrics if available
+            if (performanceMetrics.historical_data) {
+                const trendsCard = document.createElement('div');
+                trendsCard.className = 'bg-white p-4 rounded-lg shadow-sm mt-4';
+                trendsCard.innerHTML = `
+                    <h3 class="font-semibold text-lg mb-3">Performance Trends</h3>
+                    <div class="space-y-2">
+                        ${Object.entries(performanceMetrics.historical_data).map(([metric, value]) => `
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">${metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                <span class="font-semibold">${value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(trendsCard);
+            }
         }
 
         function getScoreColor(score) {
@@ -314,6 +446,14 @@
             if (score >= 6) return 'bg-yellow-100 border-yellow-200';
             return 'bg-red-100 border-red-200';
         }
+
+        // Add event listener for Enter key on textarea
+        document.getElementById('urlInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                event.preventDefault();
+                analyzeWebsites();
+            }
+        });
     </script>
 </body>
 </html>
