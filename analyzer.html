@@ -2,220 +2,356 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Analyzer - Technical Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Technical Website Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
-        .score-card {
-            transition: all 0.3s ease;
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
         }
-        .score-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .input-section {
+                flex-direction: row;
+            }
+        }
+
+        input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            min-width: 0;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        #progressContainer {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background: var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #results {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
         .metric-card {
-            transition: all 0.2s ease;
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
         }
-        .metric-card:hover {
-            transform: translateX(5px);
+
+        .metric-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
         }
-        .recommendation-card {
-            transition: all 0.3s ease;
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1rem 0;
         }
-        .recommendation-card:hover {
-            transform: translateY(-3px);
+
+        .good { color: var(--success); }
+        .average { color: var(--warning); }
+        .poor { color: var(--danger); }
+
+        .recommendations {
+            margin-top: 2rem;
+        }
+
+        .recommendation-item {
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            background: var(--card);
+            margin-bottom: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .website-card {
+            background: var(--card);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .website-url {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .chart-container {
+            margin-top: 2rem;
+            height: 300px;
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto p-6">
-        <!-- Input Section -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h1 class="text-2xl font-bold mb-4">Technical Website Analysis</h1>
-            <textarea 
-                id="urlInput" 
-                class="w-full p-2 border rounded mb-4" 
-                rows="4" 
-                placeholder="Enter websites (one per line):&#10;example.com&#10;google.com&#10;github.com"
-            ></textarea>
-            <button 
-                onclick="analyzeWebsites()" 
-                id="analyzeButton"
-                class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 font-semibold"
-            >
-                Analyze Websites
-            </button>
-            <!-- Progress Bar -->
-            <div id="progressContainer" class="hidden mt-4">
-                <div class="w-full bg-gray-200 rounded-full">
-                    <div id="progressBar" class="h-2 bg-blue-500 rounded-full" style="width: 0%;"></div>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Technical Website Analysis</h1>
+            <p>Analyze your website's technical performance, SEO, accessibility, and design</p>
+        </div>
+
+        <div class="card">
+            <div class="input-section">
+                <input type="text" id="urlInput" placeholder="Enter website URL (e.g., example.com)" />
+                <button id="analyzeButton">Analyze Website</button>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="progressContainer">
+                <div class="progress-bar">
+                    <div id="progressBar" class="progress-bar-fill"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Results Section -->
-        <div id="results" class="hidden space-y-6">
-            <!-- Website Selection -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">Analyzed Websites</h2>
-                <div id="websiteList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        <div id="results">
+            <div class="card">
+                <h2>Overall Score</h2>
+                <div id="overallScore" class="score"></div>
             </div>
 
-            <!-- Technical Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold mb-4">Score Overview</h2>
-                    <canvas id="radarChart"></canvas>
+            <div class="grid">
+                <div class="metric-card">
+                    <h3>Performance</h3>
+                    <div id="performanceScore" class="score"></div>
+                    <div id="performanceDetails"></div>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-bold mb-4">Detailed Metrics</h2>
-                    <canvas id="barChart"></canvas>
+                <div class="metric-card">
+                    <h3>SEO</h3>
+                    <div id="seoScore" class="score"></div>
+                    <div id="seoDetails"></div>
+                </div>
+                <div class="metric-card">
+                    <h3>Accessibility</h3>
+                    <div id="accessibilityScore" class="score"></div>
+                    <div id="accessibilityDetails"></div>
                 </div>
             </div>
 
-            <!-- Recommendations -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">Technical Recommendations</h2>
-                <div id="recommendations" class="space-y-4"></div>
+            <div class="card recommendations">
+                <h2>Technical Recommendations</h2>
+                <div id="recommendationsList"></div>
             </div>
 
-            <!-- Detailed Metrics -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">Technical Analysis</h2>
-                <div id="detailedMetrics" class="space-y-6"></div>
-            </div>
-
-            <!-- Performance Timeline -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">Performance Metrics</h2>
-                <div id="performanceMetrics" class="space-y-4"></div>
+            <div class="card">
+                <h2>Detailed Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="metricsChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentWebsite = null;
-        let radarChart = null;
-        let barChart = null;
+        const urlInput = document.getElementById('urlInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const results = document.getElementById('results');
 
-        async function analyzeWebsites() {
-            const button = document.getElementById('analyzeButton');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBar = document.getElementById('progressBar');
-            const urls = document.getElementById('urlInput').value
-                .split('\n')
-                .map(url => url.trim())
-                .filter(url => url);
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
 
-            if (urls.length === 0) {
-                alert('Please enter at least one URL');
-                return;
-            }
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
 
-            button.disabled = true;
-            button.textContent = 'Analyzing...';
-            progressContainer.classList.remove('hidden');
-            progressBar.style.width = '0%';
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
+        }
 
-            // Simulate incremental progress to 90%
-            let progress = 0;
-            const incrementProgress = () => {
-                if (progress < 90) {
-                    progress += Math.floor(Math.random() * 10) + 1; // Increase by 1-10%
-                    progressBar.style.width = `${Math.min(progress, 90)}%`;
-                }
-            };
-            const progressInterval = setInterval(incrementProgress, 300);
-
-            try {
-                const response = await fetch('http://localhost:8000/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ urls })
-                });
-
-                const result = await response.json();
-
-                clearInterval(progressInterval); // Stop progress simulation
-                progressBar.style.width = '100%'; // Set to 100% upon completion
-                document.getElementById('results').classList.remove('hidden');
-                displayResults(result.data);
-            } catch (error) {
-                clearInterval(progressInterval);
-                console.error('Error:', error);
-                alert('Error analyzing websites. Please check the console for details.');
-            } finally {
-                button.disabled = false;
-                button.textContent = 'Analyze Websites';
-                setTimeout(() => progressContainer.classList.add('hidden'), 1000);
-            }
+        function getScoreClass(score) {
+            if (score >= 8) return 'good';
+            if (score >= 6) return 'average';
+            return 'poor';
         }
 
         function displayResults(data) {
-            const websiteList = document.getElementById('websiteList');
-            websiteList.innerHTML = '';
+            results.style.display = 'block';
+            
+            // Display scores
+            const scores = data.detailed_results[0].scores;
+            document.getElementById('overallScore').textContent = `${scores.overall_score}/10`;
+            document.getElementById('overallScore').className = `score ${getScoreClass(scores.overall_score)}`;
+            
+            document.getElementById('performanceScore').textContent = `${scores.performance_score}/10`;
+            document.getElementById('performanceScore').className = `score ${getScoreClass(scores.performance_score)}`;
+            
+            document.getElementById('seoScore').textContent = `${scores.seo_score}/10`;
+            document.getElementById('seoScore').className = `score ${getScoreClass(scores.seo_score)}`;
+            
+            document.getElementById('accessibilityScore').textContent = `${scores.accessibility_score}/10`;
+            document.getElementById('accessibilityScore').className = `score ${getScoreClass(scores.accessibility_score)}`;
 
-            data.detailed_results.forEach(website => {
-                if (!website.success) return;
+            // Create recommendations
+            const metrics = data.detailed_results[0].metrics;
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
 
-                const card = document.createElement('div');
-                card.className = `score-card bg-white p-4 rounded-lg border-2 cursor-pointer 
-                    ${getScoreBackground(website.scores.overall_score)}`;
-                card.onclick = () => updateCharts(website);
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium truncate">${website.url}</span>
-                        <span class="text-green-500">✓</span>
-                    </div>
-                    <div class="text-xl font-bold mt-2 ${getScoreColor(website.scores.overall_score)}">
-                        ${website.scores.overall_score.toFixed(1)}/10
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">
-                        Click for detailed analysis
-                    </div>
-                `;
-
-                websiteList.appendChild(card);
+            Object.entries(metrics).forEach(([category, categoryMetrics]) => {
+                Object.entries(categoryMetrics).forEach(([metric, score]) => {
+                    if (score < 7) {
+                        const recommendation = document.createElement('div');
+                        recommendation.className = 'recommendation-item';
+                        recommendation.innerHTML = `
+                            <h4>${category.charAt(0).toUpperCase() + category.slice(1)}: ${metric.replace(/_/g, ' ')}</h4>
+                            <p>Score: ${score}/10</p>
+                        `;
+                        recommendationsList.appendChild(recommendation);
+                    }
+                });
             });
 
-            if (data.detailed_results.length > 0) {
-                updateCharts(data.detailed_results[0]);
-            }
-        }
-
-        function updateCharts(website) {
-            currentWebsite = website;
-            updateRadarChart(website);
-            updateBarChart(website);
-            updateMetricsTable(website);
-            updateRecommendations(website);
-        }
-
-        function updateRadarChart(website) {
-            const ctx = document.getElementById('radarChart');
-            
-            if (radarChart) {
-                radarChart.destroy();
-            }
-
-            radarChart = new Chart(ctx, {
+            // Create chart
+            const ctx = document.getElementById('metricsChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Performance', 'Design', 'SEO', 'Accessibility'],
+                    labels: ['Performance', 'SEO', 'Accessibility', 'Design'],
                     datasets: [{
                         label: 'Scores',
                         data: [
-                            website.scores.performance_score,
-                            website.scores.design_score,
-                            website.scores.seo_score,
-                            website.scores.accessibility_score
+                            scores.performance_score,
+                            scores.seo_score,
+                            scores.accessibility_score,
+                            scores.design_score
                         ],
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 2
                     }]
                 },
                 options: {
@@ -229,91 +365,51 @@
             });
         }
 
-        function updateBarChart(website) {
-            const ctx = document.getElementById('barChart');
-            const metrics = [];
-            const values = [];
-
-            for (const [category, categoryMetrics] of Object.entries(website.metrics)) {
-                for (const [metric, value] of Object.entries(categoryMetrics)) {
-                    metrics.push(`${category}: ${metric}`);
-                    values.push(value);
-                }
+        analyzeButton.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a website URL');
+                return;
             }
 
-            if (barChart) {
-                barChart.destroy();
-            }
+            try {
+                hideError();
+                analyzeButton.disabled = true;
+                progressContainer.style.display = 'block';
+                updateProgress(20);
 
-            barChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: metrics,
-                    datasets: [{
-                        label: 'Score',
-                        data: values,
-                        backgroundColor: 'rgb(59, 130, 246)',
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10
-                        }
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    body: JSON.stringify({
+                        urls: [url]
+                    })
+                });
+
+                updateProgress(70);
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Analysis failed');
                 }
-            });
-        }
 
-        function updateMetricsTable(website) {
-            const container = document.getElementById('detailedMetrics');
-            container.innerHTML = '';
+                updateProgress(100);
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    displayResults(data.data);
+                }, 500);
 
-            for (const [category, metrics] of Object.entries(website.metrics)) {
-                const section = document.createElement('div');
-                section.className = 'space-y-4';
-                section.innerHTML = `
-                    <h3 class="text-lg font-semibold capitalize">${category} Metrics</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        ${Object.entries(metrics).map(([metric, value]) => `
-                            <div class="metric-card p-4 bg-gray-50 rounded-lg">
-                                <div class="text-sm font-medium text-gray-600">
-                                    ${metric.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                </div>
-                                <div class="text-lg font-semibold ${getScoreColor(value)}">
-                                    ${typeof value === 'number' ? value.toFixed(1) : value}/10
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                container.appendChild(section);
+            } catch (error) {
+                showError(error.message);
+                results.style.display = 'none';
+            } finally {
+                analyzeButton.disabled = false;
             }
-        }
-
-        function updateRecommendations(website) {
-            const container = document.getElementById('recommendations');
-            container.innerHTML = '';
-            // Code for generating recommendations based on scores
-        }
-
-        function getScoreColor(score) {
-            if (score >= 8) return 'text-green-600';
-            if (score >= 6) return 'text-yellow-600';
-            return 'text-red-600';
-        }
-
-        function getScoreBackground(score) {
-            if (score >= 8) return 'bg-green-100 border-green-200';
-            if (score >= 6) return 'bg-yellow-100 border-yellow-200';
-            return 'bg-red-100 border-red-200';
-        }
+        });
     </script>
 </body>
 </html>
