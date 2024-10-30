@@ -37,10 +37,11 @@ class AnalysisResponse(BaseModel):
 
 @app.get("/")
 async def root():
+    # Updated to look for analyzer.html directly in the root directory
     return FileResponse("analyzer.html")
 
-@app.get("/simple")
-async def simple():
+@app.get("/simpleanalyzer")  # Add this route for simple analyzer
+async def simple_analyzer():
     return FileResponse("simpleanalyzer.html")
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
@@ -67,4 +68,5 @@ async def analyze_websites(website_list: WebsiteList):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
