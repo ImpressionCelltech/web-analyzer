@@ -1,12 +1,11 @@
+# main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import logging
 import time
-import os
 
 from analyzer import WebsiteRater
 
@@ -38,22 +37,11 @@ class AnalysisResponse(BaseModel):
 
 @app.get("/")
 async def root():
-    try:
-        return FileResponse("analyzer.html")
-    except Exception as e:
-        logger.error(f"Error serving index page: {str(e)}")
-        return HTMLResponse("""
-            <html>
-                <body>
-                    <h1>Website Analyzer</h1>
-                    <p>Error loading the analyzer interface. Please try again.</p>
-                </body>
-            </html>
-        """)
+    return FileResponse("analyzer.html")
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+@app.get("/simple")
+async def simple():
+    return FileResponse("simpleanalyzer.html")
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_websites(website_list: WebsiteList):
@@ -61,8 +49,6 @@ async def analyze_websites(website_list: WebsiteList):
         if not website_list.urls:
             raise HTTPException(status_code=400, detail="No URLs provided")
 
-        logger.info(f"Starting analysis of {len(website_list.urls)} websites")
-        
         rater = WebsiteRater()
         results = rater.analyze_websites(website_list.urls)
         
@@ -81,5 +67,4 @@ async def analyze_websites(website_list: WebsiteList):
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
